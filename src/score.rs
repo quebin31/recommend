@@ -19,12 +19,12 @@ use num_traits::real::Real;
 use std::ops::{Add, Sub};
 
 #[derive(Debug, Clone, Eq, PartialEq, Copy)]
-pub enum Score<T: Real> {
+pub enum Score<T> {
     Some(T),
     None,
 }
 
-impl<T: Real> Score<T> {
+impl<T> Score<T> {
     pub fn is_none(&self) -> bool {
         match self {
             Score::Some(_) => false,
@@ -36,6 +36,32 @@ impl<T: Real> Score<T> {
         match self {
             Score::Some(_) => true,
             _ => false,
+        }
+    }
+
+    pub fn map<F, U: Real>(self, mut op: F) -> Score<U>
+    where
+        F: FnMut(T) -> U,
+    {
+        match self {
+            Score::Some(v) => Score::Some(op(v)),
+            _ => Score::None,
+        }
+    }
+
+    pub fn unwrap(self) -> T {
+        match self {
+            Score::Some(s) => s,
+            _ => panic!("Score is empty!"),
+        }
+    }
+}
+
+impl<T: Real> From<Option<T>> for Score<T> {
+    fn from(o: Option<T>) -> Self {
+        match o {
+            Some(v) => Score::Some(v),
+            None => Score::None,
         }
     }
 }
