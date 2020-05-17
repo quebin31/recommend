@@ -46,6 +46,44 @@ where
             })
             .fold(Score::Some(T::zero()), |acc, x| acc + x)
     }
+
+    pub fn euclidean(&'a self, rhs: &'a Self) -> Score<T> {
+        self.data
+            .iter()
+            .zip(&rhs.data)
+            .filter_map(|(l, r)| {
+                if let Score::Some(s) = l - r {
+                    let s = s.powi(2);
+                    Some(Score::Some(s))
+                } else {
+                    None
+                }
+            })
+            .fold(Score::Some(T::zero()), |acc, x| acc + x)
+            .map(T::sqrt)
+    }
+
+    pub fn minkowski(&'a self, rhs: &'a Self, p: usize) -> Score<T> {
+        let d = self
+            .data
+            .iter()
+            .zip(&rhs.data)
+            .filter_map(|(l, r)| {
+                if let Score::Some(s) = l - r {
+                    let s = s.abs().powi(p as i32);
+                    Some(Score::Some(s))
+                } else {
+                    None
+                }
+            })
+            .fold(Score::Some(T::zero()), |acc, x| acc + x);
+
+        if let Some(p) = T::from(p) {
+            d.map(|v| v.powf(T::one() / p))
+        } else {
+            Score::None
+        }
+    }
 }
 
 #[cfg(test)]
