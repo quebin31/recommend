@@ -133,4 +133,10 @@ mod tests {
         assert_eq!(Score::Some(3.), Score::Some(2.) + Score::Some(1.));
         assert_eq!(Score::None, Score::Some(2.) + Score::None);
     }
+
+    #[test]
+    fn score_sub() {
+        assert_eq!(Score::Some(3.), Score::Some(5.) - Score::Some(2.));
+        assert_eq!(Score::None, Score::Some(2.) - Score::None);
+    }
 }
