@@ -15,4 +15,5 @@
 // You should have received a copy of the GNU General Public License
 // along with recommend.  If not, see <http://www.gnu.org/licenses/>.
 
+pub mod rating;
 pub mod score;
