@@ -89,17 +89,50 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
+    use assert_approx_eq::*;
 
     #[test]
-    fn distance() {
-        let r1 = Rating {
+    fn manhattan_distance() {
+        let a = Rating {
             data: vec![Score::Some(1.), Score::None, Score::Some(1.)],
         };
 
-        let r2 = Rating {
+        let b = Rating {
             data: vec![Score::Some(1.), Score::Some(1.), Score::Some(2.)],
         };
 
-        println!("{:?}", r1.manhattan(&r2));
+        let d = a.manhattan(&b);
+
+        assert_approx_eq!(1., d.unwrap());
+    }
+
+    #[test]
+    fn euclidean_distance() {
+        let a = Rating {
+            data: vec![Score::Some(0.), Score::None, Score::Some(0.)],
+        };
+
+        let b = Rating {
+            data: vec![Score::Some(2.), Score::Some(1.), Score::Some(2.)],
+        };
+
+        let d = a.euclidean(&b);
+
+        assert_approx_eq!(8f64.sqrt(), d.unwrap());
+    }
+
+    #[test]
+    fn minkowski3_distance() {
+        let a = Rating {
+            data: vec![Score::Some(0.), Score::None, Score::Some(0.)],
+        };
+
+        let b = Rating {
+            data: vec![Score::Some(2.), Score::Some(1.), Score::Some(2.)],
+        };
+
+        let d = a.minkowski(&b, 3);
+
+        assert_approx_eq!(16f64.powf(1. / 3.), d.unwrap());
     }
 }
