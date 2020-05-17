@@ -36,9 +36,8 @@ where
         self.data
             .iter()
             .zip(&rhs.data)
-            .map(|(l, r)| l - r)
-            .filter_map(|s| {
-                if let Score::Some(s) = s {
+            .filter_map(|(l, r)| {
+                if let Score::Some(s) = l - r {
                     let s = s.abs();
                     Some(Score::Some(s))
                 } else {
