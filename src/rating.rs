@@ -29,7 +29,7 @@ pub struct Rating<T: Real> {
 
 impl<'a, T> Rating<T>
 where
-    T: Default + Real + 'a,
+    T: Real + 'a,
     &'a T: Add<Output = T> + Sub<Output = T>,
 {
     pub fn manhattan(&'a self, rhs: &'a Self) -> Score<T> {
