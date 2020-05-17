@@ -53,6 +53,20 @@ where
     }
 }
 
+impl<'a, T> Add for &'a Score<T>
+where
+    &'a T: Add,
+{
+    type Output = Score<<&'a T as Add>::Output>;
+
+    fn add(self, rhs: Self) -> Self::Output {
+        match (self, rhs) {
+            (Score::Some(l), Score::Some(r)) => Score::Some(l + r),
+            _ => Score::None,
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
