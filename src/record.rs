@@ -23,11 +23,17 @@ use std::{
 };
 
 #[derive(Debug, Clone)]
-pub struct Rating<T: Real> {
+pub struct Record<T> {
     data: Vec<Score<T>>,
 }
 
-impl<'a, T> Rating<T>
+impl<T> From<Vec<Score<T>>> for Record<T> {
+    fn from(data: Vec<Score<T>>) -> Self {
+        Self { data }
+    }
+}
+
+impl<'a, T> Record<T>
 where
     T: Real + 'a,
     &'a T: Add<Output = T> + Sub<Output = T>,
@@ -93,11 +99,11 @@ mod tests {
 
     #[test]
     fn manhattan_distance() {
-        let a = Rating {
+        let a = Record {
             data: vec![Score::Some(1.), Score::None, Score::Some(1.)],
         };
 
-        let b = Rating {
+        let b = Record {
             data: vec![Score::Some(1.), Score::Some(1.), Score::Some(2.)],
         };
 
@@ -108,11 +114,11 @@ mod tests {
 
     #[test]
     fn euclidean_distance() {
-        let a = Rating {
+        let a = Record {
             data: vec![Score::Some(0.), Score::None, Score::Some(0.)],
         };
 
-        let b = Rating {
+        let b = Record {
             data: vec![Score::Some(2.), Score::Some(1.), Score::Some(2.)],
         };
 
@@ -123,11 +129,11 @@ mod tests {
 
     #[test]
     fn minkowski3_distance() {
-        let a = Rating {
+        let a = Record {
             data: vec![Score::Some(0.), Score::None, Score::Some(0.)],
         };
 
-        let b = Rating {
+        let b = Record {
             data: vec![Score::Some(2.), Score::Some(1.), Score::Some(2.)],
         };
 
