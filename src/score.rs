@@ -24,6 +24,15 @@ pub enum Score<T> {
     None,
 }
 
+impl<T> From<Option<T>> for Score<T> {
+    fn from(o: Option<T>) -> Self {
+        match o {
+            Some(v) => Score::Some(v),
+            None => Score::None,
+        }
+    }
+}
+
 impl<T> Score<T> {
     pub fn is_none(&self) -> bool {
         match self {
@@ -55,13 +64,11 @@ impl<T> Score<T> {
             _ => panic!("Score is empty!"),
         }
     }
-}
 
-impl<T: Real> From<Option<T>> for Score<T> {
-    fn from(o: Option<T>) -> Self {
-        match o {
-            Some(v) => Score::Some(v),
-            None => Score::None,
+    pub fn into_option(self) -> Option<T> {
+        match self {
+            Score::Some(s) => Some(s),
+            _ => None,
         }
     }
 }
