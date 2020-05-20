@@ -15,80 +15,91 @@
 // You should have received a copy of the GNU General Public License
 // along with recommend.  If not, see <http://www.gnu.org/licenses/>.
 
-use crate::score::Score;
 use num_traits::real::Real;
 use std::{
+    collections::{hash_map::RandomState, HashMap},
+    default::Default,
     fmt::Debug,
-    ops::{Add, Sub},
+    hash::BuildHasher,
+    ops::{AddAssign, Sub},
 };
 
-#[derive(Debug, Clone)]
-pub struct Record<T> {
-    data: Vec<Score<T>>,
-}
-
-impl<T> From<Vec<Score<T>>> for Record<T> {
-    fn from(data: Vec<Score<T>>) -> Self {
-        Self { data }
-    }
-}
-
-impl<'a, T> Record<T>
+#[derive(Debug, Clone, Default)]
+pub struct Record<V, S = RandomState>
 where
-    T: Real + 'a,
-    &'a T: Add<Output = T> + Sub<Output = T>,
+    S: BuildHasher,
 {
-    pub fn manhattan(&'a self, rhs: &'a Self) -> Score<T> {
-        self.data
-            .iter()
-            .zip(&rhs.data)
-            .filter_map(|(l, r)| {
-                if let Score::Some(s) = l - r {
-                    let s = s.abs();
-                    Some(Score::Some(s))
-                } else {
-                    None
-                }
-            })
-            .fold(Score::Some(T::zero()), |acc, x| acc + x)
+    values: HashMap<u64, V, S>,
+}
+
+impl<V> From<HashMap<u64, V>> for Record<V> {
+    fn from(map: HashMap<u64, V>) -> Self {
+        Self { values: map }
+    }
+}
+
+impl<V, S> Record<V, S>
+where
+    V: Default,
+    S: BuildHasher + Default,
+{
+    pub fn new() -> Self {
+        Self::default()
+    }
+}
+
+impl<V, S> Record<V, S>
+where
+    S: BuildHasher,
+{
+    pub fn values(&self) -> &HashMap<u64, V, S> {
+        &self.values
     }
 
-    pub fn euclidean(&'a self, rhs: &'a Self) -> Score<T> {
-        self.data
-            .iter()
-            .zip(&rhs.data)
-            .filter_map(|(l, r)| {
-                if let Score::Some(s) = l - r {
-                    let s = s.powi(2);
-                    Some(Score::Some(s))
-                } else {
-                    None
-                }
-            })
-            .fold(Score::Some(T::zero()), |acc, x| acc + x)
-            .map(T::sqrt)
+    pub fn values_mut(&mut self) -> &mut HashMap<u64, V, S> {
+        &mut self.values
     }
+}
 
-    pub fn minkowski(&'a self, rhs: &'a Self, p: usize) -> Score<T> {
-        let d = self
-            .data
-            .iter()
-            .zip(&rhs.data)
-            .filter_map(|(l, r)| {
-                if let Score::Some(s) = l - r {
-                    let s = s.abs().powi(p as i32);
-                    Some(Score::Some(s))
-                } else {
-                    None
-                }
-            })
-            .fold(Score::Some(T::zero()), |acc, x| acc + x);
-
-        if let Some(p) = T::from(p) {
-            d.map(|v| v.powf(T::one() / p))
-        } else {
-            Score::None
+impl<'a, V, S> Record<V, S>
+where
+    S: BuildHasher,
+    V: Real + AddAssign + 'a,
+    &'a V: Sub<Output = V>,
+{
+    pub fn manhattan(&'a self, rhs: &'a Self) -> Option<V> {
+        let mut dist = None;
+        for (key, val_a) in &self.values {
+            if let Some(val_b) = rhs.values.get(key) {
+                *dist.get_or_insert(V::zero()) += (val_b - val_a).abs();
+            }
         }
+
+        dist
+    }
+
+    pub fn euclidean(&'a self, rhs: &'a Self) -> Option<V> {
+        let mut dist = None;
+        for (key, val_a) in &self.values {
+            if let Some(val_b) = rhs.values.get(key) {
+                *dist.get_or_insert(V::zero()) += (val_b - val_a).powi(2);
+            }
+        }
+
+        dist.map(V::sqrt)
+    }
+
+    pub fn minkowski(&'a self, rhs: &'a Self, p: usize) -> Option<V> {
+        let mut dist = None;
+        for (key, val_a) in &self.values {
+            if let Some(val_b) = rhs.values.get(key) {
+                *dist.get_or_insert(V::zero()) += (val_b - val_a).abs().powi(p as i32);
+            }
+        }
+
+        V::from(p)
+            .map(|p| dist.map(|v| v.powf(V::one() / p)))
+            .flatten()
     }
 }
 
@@ -100,14 +111,17 @@ mod tests {
     #[test]
     fn manhattan_distance() {
         let a = Record {
-            data: vec![Score::Some(1.), Score::None, Score::Some(1.)],
+            values: [(0, 1.), (2, 2.)]
+                .iter()
+                .cloned()
+                .collect::<HashMap<u64, f64>>(),
         };
 
         let b = Record {
-            data: vec![Score::Some(1.), Score::Some(1.), Score::Some(2.)],
+            values: [(0, 1.), (1, 3.), (2, 3.)].iter().cloned().collect(),
         };
 
-        let d = a.manhattan(&b);
+        let d = b.manhattan(&a);
 
         assert_approx_eq!(1., d.unwrap());
     }
@@ -115,14 +129,17 @@ mod tests {
     #[test]
     fn euclidean_distance() {
         let a = Record {
-            data: vec![Score::Some(0.), Score::None, Score::Some(0.)],
+            values: [(0, 0.), (2, 0.)]
+                .iter()
+                .cloned()
+                .collect::<HashMap<u64, f64>>(),
         };
 
         let b = Record {
-            data: vec![Score::Some(2.), Score::Some(1.), Score::Some(2.)],
+            values: [(0, 2.), (1, 1.), (2, 2.)].iter().cloned().collect(),
         };
 
-        let d = a.euclidean(&b);
+        let d = b.euclidean(&a);
 
         assert_approx_eq!(8f64.sqrt(), d.unwrap());
     }
@@ -130,14 +147,17 @@ mod tests {
     #[test]
     fn minkowski3_distance() {
         let a = Record {
-            data: vec![Score::Some(0.), Score::None, Score::Some(0.)],
+            values: [(0, 0.), (2, 0.)]
+                .iter()
+                .cloned()
+                .collect::<HashMap<u64, f64>>(),
         };
 
         let b = Record {
-            data: vec![Score::Some(2.), Score::Some(1.), Score::Some(2.)],
+            values: [(0, 2.), (1, 1.), (2, 2.)].iter().cloned().collect(),
         };
 
-        let d = a.minkowski(&b, 3);
+        let d = b.minkowski(&a, 3);
 
         assert_approx_eq!(16f64.powf(1. / 3.), d.unwrap());
     }
