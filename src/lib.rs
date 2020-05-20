@@ -16,7 +16,6 @@
 // along with recommend.  If not, see <http://www.gnu.org/licenses/>.
 
 pub mod record;
-pub mod score;
 pub mod table;
 
 pub enum Distance {
