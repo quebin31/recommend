@@ -16,9 +16,10 @@
 // along with recommend.  If not, see <http://www.gnu.org/licenses/>.
 
 use anyhow::Error;
-use recommend::{score::Score, table::Table};
+use assert_approx_eq::assert_approx_eq;
+use recommend::{record::Record, table::Table, Distance};
 
-fn load(file: &str) -> Result<Table<f64>, Error> {
+fn load(file: &str) -> Result<Table<String, String, f64>, Error> {
     let mut csv = csv::ReaderBuilder::new()
         .has_headers(false)
         .from_path(file)?;
@@ -38,22 +39,21 @@ fn load(file: &str) -> Result<Table<f64>, Error> {
     let keys: Vec<_> = raw_table.iter().skip(1).map(|r| r[0].clone()).collect();
     let user: Vec<_> = raw_table[0].iter().skip(1).collect();
 
-    let mut table = Table::<f64>::with_keys(&keys);
+    let mut table: Table<String, String, f64> = Table::with_keys(&keys);
 
     for i in 1..raw_table[0].len() {
-        let mut scores = Vec::new();
+        let mut record = Record::new();
         for row in raw_table.iter().skip(1) {
+            let key = table.hash_key(&row[0]);
             let val = &row[i];
 
-            if val.is_empty() {
-                scores.push(Score::None);
-            } else {
+            if !val.is_empty() {
                 let val: f64 = val.parse()?;
-                scores.push(Score::Some(val));
+                record.values_mut().insert(key, val);
             }
         }
 
-        table.insert(user[i - 1], scores.into());
+        table.insert(user[i - 1].clone(), record);
     }
 
     Ok(table)
@@ -62,11 +62,31 @@ fn load(file: &str) -> Result<Table<f64>, Error> {
 #[test]
 fn music() -> Result<(), Error> {
     let table = load("test_data/music.csv")?;
+
+    assert_approx_eq!(
+        table
+            .distance_between("Angelica", "Chan", Distance::Euclidean)
+            .unwrap(),
+        table
+            .distance_between("Angelica", "Chan", Distance::Minkowski(2))
+            .unwrap()
+    );
+
     Ok(())
 }
 
 #[test]
 fn movies() -> Result<(), Error> {
     let table = load("test_data/movies.csv")?;
+
+    assert_approx_eq!(
+        table
+            .distance_between("Patrick C", "Jeff", Distance::Manhattan)
+            .unwrap(),
+        table
+            .distance_between("Patrick C", "Jeff", Distance::Minkowski(1))
+            .unwrap()
+    );
+
     Ok(())
 }

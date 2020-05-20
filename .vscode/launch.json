@@ -26,16 +26,35 @@
         {
             "type": "lldb",
             "request": "launch",
-            "name": "Debug integration test 'music'",
+            "name": "Debug integration test 'music_movies'",
             "cargo": {
                 "args": [
                     "test",
                     "--no-run",
-                    "--test=music",
+                    "--test=music_movies",
                     "--package=recommend"
                 ],
                 "filter": {
-                    "name": "music",
+                    "name": "music_movies",
+                    "kind": "test"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug integration test 'books_ratings'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--test=books_ratings",
+                    "--package=recommend"
+                ],
+                "filter": {
+                    "name": "books_ratings",
                     "kind": "test"
                 }
             },
