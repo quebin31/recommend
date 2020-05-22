@@ -129,9 +129,9 @@ where
         let b = b.borrow();
 
         match method {
-            Distance::Manhattan => self.record(a)?.manhattan(self.record(b)?),
-            Distance::Euclidean => self.record(a)?.euclidean(self.record(b)?),
-            Distance::Minkowski(p) => self.record(a)?.minkowski(self.record(b)?, p),
+            Distance::Manhattan => self.record(a)?.manhattan_distance(self.record(b)?),
+            Distance::Euclidean => self.record(a)?.euclidean_distance(self.record(b)?),
+            Distance::Minkowski(p) => self.record(a)?.minkowski_distance(self.record(b)?, p),
         }
     }
 }

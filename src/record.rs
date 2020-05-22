@@ -67,7 +67,7 @@ where
     V: Real + AddAssign + MulAssign + 'a,
     &'a V: Sub<Output = V>,
 {
-    pub fn manhattan(&'a self, rhs: &'a Self) -> Option<V> {
+    pub fn manhattan_distance(&'a self, rhs: &'a Self) -> Option<V> {
         let a_keys: HashSet<_> = self.values.keys().collect();
         let b_keys: HashSet<_> = rhs.values.keys().collect();
         let common_keys = a_keys.intersection(&b_keys);
@@ -83,7 +83,7 @@ where
         dist
     }
 
-    pub fn euclidean(&'a self, rhs: &'a Self) -> Option<V> {
+    pub fn euclidean_distance(&'a self, rhs: &'a Self) -> Option<V> {
         let a_keys: HashSet<_> = self.values.keys().collect();
         let b_keys: HashSet<_> = rhs.values.keys().collect();
         let common_keys = a_keys.intersection(&b_keys);
@@ -99,7 +99,7 @@ where
         dist.map(V::sqrt)
     }
 
-    pub fn minkowski(&'a self, rhs: &'a Self, p: usize) -> Option<V> {
+    pub fn minkowski_distance(&'a self, rhs: &'a Self, p: usize) -> Option<V> {
         let a_keys: HashSet<_> = self.values.keys().collect();
         let b_keys: HashSet<_> = rhs.values.keys().collect();
         let common_keys = a_keys.intersection(&b_keys);
@@ -211,7 +211,7 @@ mod tests {
             values: [(0, 1.), (1, 3.), (2, 3.)].iter().cloned().collect(),
         };
 
-        let d = b.manhattan(&a);
+        let d = b.manhattan_distance(&a);
 
         assert_approx_eq!(1., d.unwrap());
     }
@@ -229,7 +229,7 @@ mod tests {
             values: [(0, 2.), (1, 1.), (2, 2.)].iter().cloned().collect(),
         };
 
-        let d = b.euclidean(&a);
+        let d = b.euclidean_distance(&a);
 
         assert_approx_eq!(8f64.sqrt(), d.unwrap());
     }
@@ -247,7 +247,7 @@ mod tests {
             values: [(0, 2.), (1, 1.), (2, 2.)].iter().cloned().collect(),
         };
 
-        let d = b.minkowski(&a, 3);
+        let d = b.minkowski_distance(&a, 3);
 
         assert_approx_eq!(16f64.powf(1. / 3.), d.unwrap());
     }
