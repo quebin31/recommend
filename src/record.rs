@@ -61,12 +61,12 @@ where
     }
 }
 
-impl<'a, V, S> Record<V, S>
+impl<V, S> Record<V, S>
 where
     S: BuildHasher,
-    V: Real + AddAssign + MulAssign + Sub + Mul + 'a,
+    V: Real + AddAssign + MulAssign + Sub + Mul,
 {
-    pub fn manhattan_distance(&'a self, rhs: &'a Self) -> Option<V> {
+    pub fn manhattan_distance(&self, rhs: &Self) -> Option<V> {
         let mut dist = None;
 
         for (key, x) in &self.values {
@@ -78,7 +78,7 @@ where
         dist
     }
 
-    pub fn euclidean_distance(&'a self, rhs: &'a Self) -> Option<V> {
+    pub fn euclidean_distance(&self, rhs: &Self) -> Option<V> {
         let mut dist = None;
 
         for (key, x) in &self.values {
@@ -90,7 +90,7 @@ where
         dist.map(V::sqrt)
     }
 
-    pub fn minkowski_distance(&'a self, rhs: &'a Self, p: usize) -> Option<V> {
+    pub fn minkowski_distance(&self, rhs: &Self, p: usize) -> Option<V> {
         let mut dist = None;
 
         for (key, x) in &self.values {
@@ -104,7 +104,7 @@ where
             .flatten()
     }
 
-    pub fn jaccard_index(&'a self, rhs: &'a Self) -> Option<V> {
+    pub fn jaccard_index(&self, rhs: &Self) -> Option<V> {
         let lhs_keys: HashSet<_> = self.values.keys().collect();
         let rhs_keys: HashSet<_> = rhs.values.keys().collect();
 
@@ -118,11 +118,11 @@ where
         }
     }
 
-    pub fn jaccard_distance(&'a self, rhs: &'a Self) -> Option<V> {
+    pub fn jaccard_distance(&self, rhs: &Self) -> Option<V> {
         Some(V::one() - self.jaccard_index(rhs)?)
     }
 
-    pub fn cosine_similarity(&'a self, rhs: &'a Self) -> Option<V> {
+    pub fn cosine_similarity(&self, rhs: &Self) -> Option<V> {
         let mut a_norm = None;
         let mut b_norm = None;
         let mut dot_prod = None;
@@ -140,7 +140,7 @@ where
         Some(dot_prod? / norm)
     }
 
-    pub fn pearson_correlation(&'a self, rhs: &'a Self) -> Option<V> {
+    pub fn pearson_correlation(&self, rhs: &Self) -> Option<V> {
         let mut mean_x = None;
         let mut mean_y = None;
         let mut total = 0;
