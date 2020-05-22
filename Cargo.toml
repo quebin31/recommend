@@ -14,7 +14,8 @@ anyhow = "1"
 assert_approx_eq = "1"
 csv = "1"
 criterion = "0.3"
+rand = "0.7"
 
 [[bench]]
-name = "for_if"
+name = "distances"
 harness = false
