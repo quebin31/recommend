@@ -64,15 +64,14 @@ where
 impl<'a, V, S> Record<V, S>
 where
     S: BuildHasher,
-    V: Real + AddAssign + MulAssign + 'a,
-    &'a V: Sub<Output = V> + Mul<Output = V>,
+    V: Real + AddAssign + MulAssign + Sub + Mul + 'a,
 {
     pub fn manhattan_distance(&'a self, rhs: &'a Self) -> Option<V> {
         let mut dist = None;
 
         for (key, x) in &self.values {
             if let Some(y) = rhs.values.get(key) {
-                *dist.get_or_insert_with(V::zero) += (y - x).abs();
+                *dist.get_or_insert_with(V::zero) += (*y - *x).abs();
             }
         }
 
@@ -84,7 +83,7 @@ where
 
         for (key, x) in &self.values {
             if let Some(y) = rhs.values.get(key) {
-                *dist.get_or_insert_with(V::zero) += (y - x).powi(2);
+                *dist.get_or_insert_with(V::zero) += (*y - *x).powi(2);
             }
         }
 
@@ -96,7 +95,7 @@ where
 
         for (key, x) in &self.values {
             if let Some(y) = rhs.values.get(key) {
-                *dist.get_or_insert_with(V::zero) += (y - x).abs().powi(p as i32);
+                *dist.get_or_insert_with(V::zero) += (*y - *x).abs().powi(p as i32);
             }
         }
 
@@ -132,7 +131,7 @@ where
             if let Some(y) = rhs.values.get(key) {
                 *a_norm.get_or_insert_with(V::zero) += x.powi(2);
                 *b_norm.get_or_insert_with(V::zero) += y.powi(2);
-                *dot_prod.get_or_insert_with(V::one) *= x * y;
+                *dot_prod.get_or_insert_with(V::one) *= (*x) * (*y);
             }
         }
 
