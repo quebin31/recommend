@@ -13,3 +13,8 @@ num-traits = "0.2.11"
 anyhow = "1"
 assert_approx_eq = "1"
 csv = "1"
+criterion = "0.3"
+
+[[bench]]
+name = "for_if"
+harness = false
