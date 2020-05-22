@@ -22,7 +22,7 @@ use std::{
     collections::hash_map::RandomState,
     collections::HashMap,
     hash::{BuildHasher, Hash, Hasher},
-    ops::{AddAssign, MulAssign, Sub},
+    ops::{AddAssign, Mul, MulAssign, Sub},
 };
 
 #[derive(Debug, Clone, Default)]
@@ -111,7 +111,7 @@ where
     K: Hash + Eq,
     S: BuildHasher,
     V: Real + AddAssign + MulAssign + 'a,
-    &'a V: Sub<Output = V>,
+    &'a V: Sub<Output = V> + Mul<Output = V>,
 {
     pub fn distance_between<P: ?Sized, Q: ?Sized>(
         &'a self,
